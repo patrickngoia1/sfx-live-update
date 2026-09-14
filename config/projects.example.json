@@ -1,0 +1,35 @@
+{
+  "_comment": "Copy this to projects.json and fill in your own values; projects.json is gitignored and never committed. 'roadmap_ids' are the Program ID values carried by initiatives in the Tactical Cycle daily snapshot — list more than one where an ID has drifted historically, and the skill folds them into a single project. 'doc' is the Google Doc ID of that project's Live Update document; null means report-only, with no document to publish to. 'tab_ok' records whether the target tab already exists: the Docs API cannot create a tab, so the skill stops and asks rather than writing into the wrong one.",
+
+  "teams": ["<Focus Area> - <Squad A>", "<Focus Area> - <Squad B>"],
+  "excluded_teams": ["<a squad configured in Cadence but not reported on>"],
+  "tab_name": "AI Live Update",
+  "repo": "<org>/<tactical-cycle-repo>",
+
+  "rollup": {
+    "name": "<display name for the all-squads roll-up>",
+    "doc": "<google-doc-id>",
+    "tab_ok": true
+  },
+
+  "projects": [
+    {
+      "name": "<project, named as its Live Update document names it>",
+      "roadmap_ids": ["<PROGRAM-ID>", "<OLDER-DRIFTED-PROGRAM-ID>"],
+      "doc": "<google-doc-id>",
+      "tab_ok": true
+    },
+    {
+      "name": "<a project whose document lacks the target tab>",
+      "roadmap_ids": ["<PROGRAM-ID>"],
+      "doc": "<google-doc-id>",
+      "tab_ok": false,
+      "tab_note": "No 'AI Live Update' tab — needs creating by hand before this project can be published."
+    },
+    {
+      "name": "<a programme with no Live Update document>",
+      "roadmap_ids": ["<PROGRAM-ID>"],
+      "doc": null
+    }
+  ]
+}
