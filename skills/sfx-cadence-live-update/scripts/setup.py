@@ -18,8 +18,8 @@ import argparse, json, os, re, subprocess, sys, unicodedata
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import docsapi
 
-HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CONFIG = os.path.join(HERE, "config", "projects.json")
+import confighome
+CONFIG = confighome.path("projects.json")
 # Drive's `contains` matches word prefixes, not substrings: 'ive update' finds
 # nothing. It is already case-insensitive, so 'Live update' covers both spellings.
 DOC_QUERY = ("name contains 'Live update' and "
@@ -211,6 +211,7 @@ def main():
         print("\nNo --rollup-doc given; the whole-portfolio run will have nowhere to publish.")
 
     if a.apply:
+        confighome.ensure()
         with open(CONFIG, "w") as f:
             json.dump(cfg, f, indent=2, ensure_ascii=False)
         print("\nwrote %s" % CONFIG)

@@ -1,0 +1,7 @@
+{
+  "name": "sfx-live-update",
+  "version": "0.1.0",
+  "description": "Turn Tactical Cycle status into a readable status table and publish it into the matching Google Docs Live Update document. Derives its own configuration from your Focus Area — squads, projects and documents are discovered, not hand-written. Requires the Cadence plugin's GitHub setup and a Google credential with the documents scope.",
+  "author": { "name": "Patrick Goia" },
+  "keywords": ["cadence", "tactical-cycle", "live-update", "google-docs", "status-report", "sfx"]
+}

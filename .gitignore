@@ -1,8 +1,8 @@
-# Your real configuration — document IDs, project and squad names. Never commit.
-config/projects.json
-config/people.json
+# Operator configuration lives in ~/.claude/sfx-live-update/, never in the repo.
+# These patterns are belt-and-braces in case someone runs from a working copy.
+**/config/projects.json
+**/config/people.json
 
-# Scratch
 *.pyc
 __pycache__/
 payload*.json
