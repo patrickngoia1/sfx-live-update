@@ -131,18 +131,16 @@ def main():
                   % (s["title"] or "(single table)", len(s["rows"]), len(s["header"])))
         return
 
-    # ---- 1. replace a previous run, then lay down the whole skeleton ---------
+    # ---- 1. lay down the whole skeleton, above everything already there ------
+    # APPEND-ONLY BY DESIGN. Nothing existing is ever deleted or overwritten. A
+    # repeat run on the same day adds a second entry rather than replacing the
+    # first — a duplicate someone can delete by hand beats an automated rewrite
+    # quietly destroying a published entry.
     reqs = []
     if len(content) > 1 and ptext(content[1]).strip() == heading:
-        end = None
-        for el in content[2:]:
-            if style_of(el) == "HEADING_2":
-                end = el["startIndex"]
-                break
-        if end:
-            print("replacing previous entry (1 -> %d)" % end)
-            reqs.append({"deleteContentRange": {
-                "range": {"startIndex": 1, "endIndex": end, "tabId": tab}}})
+        print("NOTE: an entry titled %r is already at the top of this tab.\n"
+              "      Adding the new one above it; nothing is overwritten.\n"
+              "      Delete whichever you don't want by hand." % heading)
 
     block = heading + "\n" + "".join(s + "\n" for s in subtitle)
     h_end = 1 + u16(heading) + 1
@@ -232,7 +230,10 @@ def main():
     content = docsapi.tab_content(docsapi.get_doc(a.doc), tab)
     tables = entry_tables(content)
 
-    styles, linked = [], 0
+    BLACK = {"color": {"rgbColor": {"red": 0.0, "green": 0.0, "blue": 0.0}}}
+    bold_cols = p.get("bold_columns", [])
+
+    styles, linked, bolded = [], 0, 0
     for sec, tbl in zip(sections, tables):
         trows = tbl["table"]["tableRows"]
         for i, cell in enumerate(trows[0]["tableCells"]):
@@ -244,15 +245,28 @@ def main():
         for r, row in enumerate(trows[1:]):
             key = sec["rows"][r][0]
             url = links.get(key)
-            if not url:
-                continue
-            start = row["tableCells"][0]["content"][0]["startIndex"]
-            styles.append({"updateTextStyle": {
-                "range": {"startIndex": start, "endIndex": start + u16(key), "tabId": tab},
-                "textStyle": {"link": {"url": url}}, "fields": "link"}})
-            linked += 1
+            if url:
+                start = row["tableCells"][0]["content"][0]["startIndex"]
+                styles.append({"updateTextStyle": {
+                    "range": {"startIndex": start, "endIndex": start + u16(key), "tabId": tab},
+                    "textStyle": {"link": {"url": url}}, "fields": "link"}})
+                linked += 1
+            # Bold + explicitly black: a cell can otherwise inherit a link's blue
+            # from a neighbour, and the ask is for these to read as plain emphasis.
+            for c in bold_cols:
+                text = sec["rows"][r][c]
+                if not text:
+                    continue
+                start = row["tableCells"][c]["content"][0]["startIndex"]
+                styles.append({"updateTextStyle": {
+                    "range": {"startIndex": start,
+                              "endIndex": start + u16(text.split("\n")[0]), "tabId": tab},
+                    "textStyle": {"bold": True, "foregroundColor": BLACK},
+                    "fields": "bold,foregroundColor"}})
+                bolded += 1
 
-    print("styling %d header row(s) + %d issue links" % (len(sections), linked))
+    print("styling %d header row(s), %d issue links, %d bold cells"
+          % (len(sections), linked, bolded))
     docsapi.batch_update(a.doc, styles)
     print("done")
 

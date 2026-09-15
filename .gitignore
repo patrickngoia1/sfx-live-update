@@ -1,5 +1,6 @@
 # Your real configuration — document IDs, project and squad names. Never commit.
 config/projects.json
+config/people.json
 
 # Scratch
 *.pyc
