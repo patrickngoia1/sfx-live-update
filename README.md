@@ -135,6 +135,20 @@ Two things cost real time and are worth knowing before you reach for them:
 - **The Docs API cannot create a tab.** If the target tab is missing, the script stops and says so
   rather than writing into a different tab. Add it by hand in Google Docs.
 
+## Releasing a change
+
+`claude plugin update` compares the installed version against `version` in
+`.claude-plugin/plugin.json`. **If you merge a change without bumping it, nobody is offered the
+update** — the updater reports "already at the latest version" and every user keeps running the
+old code. Bump it in the same change that you merge:
+
+```bash
+# .claude-plugin/plugin.json      -> "version": "0.2.0"
+# .claude-plugin/marketplace.json -> "metadata": { "version": "0.2.0" }
+```
+
+Users then pick it up with `claude plugin update sfx-live-update`.
+
 ## Licence
 
 Not yet decided — add one before treating this as reusable by others.
