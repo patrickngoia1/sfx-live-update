@@ -54,13 +54,21 @@ that project or to the whole portfolio.
 
 ## Install
 
+It is a Claude Code plugin, so updates reach you with one command instead of a re-clone:
+
 ```bash
-git clone https://github.com/<you>/sfx-live-update.git \
-  ~/.claude/skills/sfx-cadence-live-update
+claude plugin marketplace add patrickngoia1/sfx-live-update
+claude plugin install sfx-live-update@sfx-live-update
 ```
 
-That's it. Invoke `/sfx-cadence-live-update` and answer one question — your Focus Area — and the
-skill works the rest out:
+To pick up later versions:
+
+```bash
+claude plugin update sfx-live-update
+```
+
+Then invoke `/sfx-cadence-live-update` and answer one question — your Focus Area. The skill works
+out the rest:
 
 - **your squads**, from the Tactical Cycle repo's own Focus Area file;
 - **your projects and their Program IDs**, from the projects those squads actually lead in the
@@ -73,16 +81,22 @@ Nothing is hand-written and nothing is guessed silently: a document match is aut
 when the project name and the document title genuinely correspond, and every weaker match is put
 in front of you with its candidates.
 
-To redo it later — a new project, a new squad — run it again:
+To redo the discovery later — a new project, a new squad — run it again:
 
 ```bash
-python3 scripts/setup.py --focus-area SFX --exclude "SFX - Lead" \
-  --rollup-doc <id> --rollup-name "<display name>"        # proposes
-python3 scripts/setup.py ... --apply                       # writes
+python3 scripts/setup.py --focus-area SFX --repo <owner>/<tactical-cycle-repo> \
+  --exclude "SFX - Lead" --rollup-doc <id> --rollup-name "<display name>"   # proposes
+python3 scripts/setup.py ... --apply                                        # writes
 ```
 
-The generated `config/projects.json` and `config/people.json` are gitignored: **document IDs,
-project names and people never leave your machine.**
+### Where your configuration lives
+
+**`~/.claude/sfx-live-update/`** — not inside the plugin. A plugin update installs into a new
+versioned directory, so anything kept beside the code would be lost every time you upgraded. Your
+document IDs, project names and the people map stay in your own home directory and survive
+upgrades untouched. Override the location with `SFX_LIVE_UPDATE_HOME` if you prefer.
+
+Nothing from that directory is ever committed.
 
 ## Prerequisites
 

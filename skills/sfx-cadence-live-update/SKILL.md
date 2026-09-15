@@ -22,7 +22,8 @@ the `AI Live Update` tab of the relevant Live Update document.
 while nothing is running. Counting initiatives per project needs the snapshot — that happens
 *after* the choice, not before it.
 
-Read `config/projects.json` and show every project as a numbered list, marking the ones with no
+Read the config from `~/.claude/sfx-live-update/projects.json` (override:
+`SFX_LIVE_UPDATE_HOME`) and show every project as a numbered list, marking the ones with no
 Live Update document. Then add the whole-portfolio option as the last number. Ask the user to reply
 with a number, and stop.
 
@@ -41,7 +42,7 @@ Preconditions: `gh auth status` must pass. If not, point at the Cadence plugin's
 snapshot:
 
 ```
-TC=$(jq -r .repo config/projects.json)
+TC=$(jq -r .repo ~/.claude/sfx-live-update/projects.json)
 s=$(gh api repos/$TC/contents/snapshots --jq '[.[].name]|sort|last')
 gh api repos/$TC/contents/snapshots/$s -H "Accept: application/vnd.github.raw"
 ```
@@ -105,7 +106,7 @@ project name as the document names it, not the Cadence ID.
 
 Take the owner from the initiative's own assignee; fall back to the delivery item's assignee, then
 to whoever holds most of the tasks. Translate the handle to a real name through
-`config/people.json`.
+`~/.claude/sfx-live-update/people.json`.
 
 That file is built by matching a handle's letters against the Google Workspace directory
 (`gws people people searchDirectoryPeople`) and accepting a match **only when some rendering of
@@ -241,8 +242,12 @@ matching is the one part that can be wrong:
 
 Re-run it whenever squads or projects change; it is how a newly created project appears.
 
-For the Responsible column, `config/people.json` is built the same way — resolve each assignee
+For the Responsible column, `~/.claude/sfx-live-update/people.json` is built the same way — resolve each assignee
 handle against the Workspace directory, accept only exact matches, list the rest as `unknown`.
+
+Configuration is written to `~/.claude/sfx-live-update/`, deliberately outside the plugin: a
+plugin upgrade installs into a new versioned directory, so config kept beside the code would be
+destroyed on every update.
 
 ## Auth notes
 

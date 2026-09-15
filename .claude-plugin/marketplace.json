@@ -1,0 +1,15 @@
+{
+  "name": "sfx-live-update",
+  "owner": { "name": "Patrick Goia" },
+  "metadata": {
+    "description": "Marketplace for the SFX Live Update skill — publishes Tactical Cycle status into Google Docs Live Update documents. Installed as a plugin so updates reach everyone with `claude plugin update`.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "sfx-live-update",
+      "source": "./",
+      "description": "Report the latest status of Tactical Cycle initiatives led by your squads and publish it into the matching Live Update document. Requires the Cadence plugin."
+    }
+  ]
+}
