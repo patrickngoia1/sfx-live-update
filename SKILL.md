@@ -15,16 +15,23 @@ the `AI Live Update` tab of the relevant Live Update document.
 
 **Read-only against GitHub. Writes only to Google Docs, and only after the user confirms.**
 
-## 1. Ask for the scope — one question, two kinds of answer
+## 1. Ask for the scope FIRST — before running anything
 
-Read `config/projects.json` (copy `config/projects.example.json` if it does not exist yet) and ask
-the user to pick **one**:
+**Do not fetch, query or compute before the user has chosen.** The list comes straight out of
+`config/projects.json`, which needs no network call, so present it immediately and let the user act
+while nothing is running. Counting initiatives per project needs the snapshot — that happens
+*after* the choice, not before it.
 
-- a **single Program / Project** → writes to that project's own Live Update document
-- **all led initiatives** → writes to the roll-up document only
+Read `config/projects.json` and show every project as a numbered list, marking the ones with no
+Live Update document. Then add the whole-portfolio option as the last number. Ask the user to reply
+with a number, and stop.
 
-There is no "by team" option. Show the initiative count per project (pre-deduplication) and flag
-which entries have no document, so the choice is informed.
+If that file does not exist, this is a first run: generate it instead (see *First run* below), then
+show the list.
+
+There is no "by team" option.
+
+Only once they have answered: fetch the snapshot and do the work.
 
 ## 2. Pull the data (no clone, `gh` only)
 
@@ -84,33 +91,96 @@ or to everything. If it does not, a dedup rule is misfiring.
 **Title** — `<Mon D, YYYY> | <Project name>`, matching the tab's existing convention. Use the
 project name as the document names it, not the Cadence ID.
 
-**Rows ordered by issue number, ascending.** Four columns:
+**Rows ordered by issue number, ascending.** Five columns:
 
-| # | Initiative | Team | Observations |
-|---|---|---|---|
+| # | Initiative | Responsible | Team | Observations |
+|---|---|---|---|---|
 
 - **#** — the GitHub issue number, hyperlinked to `https://github.com/<repo>/issues/<n>`.
-- **Observations** — two lines. First: `<Health> - <Status> - <dates>`. Then the narrative.
-  - **Health** is Cadence's computed Health Status, never recomputed: 🟢 Green · 🟡 Yellow ·
-    🔴 Red · ✅ Done · ⚪ Not started.
-  - **Status** is a one-word stage read from the work: Definition, Refinement, Alignment,
-    In development, In UAT, UAT scheduled, Awaiting dependency, Blocked, Not started.
-  - **dates** are the UAT and production ETAs mined from comments and task titles. Where none
-    exists, say so rather than inventing one.
-  - The narrative says what is being worked on, what is blocking, and what deserves attention.
+- **Initiative** — the **full** name, bold and black. Pass `"bold_columns": [1]` in the payload.
+- **Responsible** — the person's **real name**, never a GitHub handle. See *Naming people* below.
+- **Observations** — see *Laying out Observations* below. Never a paragraph.
 
-Also emit a `Cycle:` line, an `At a glance:` line, and a short footer: legend plus two or three
-portfolio notes.
+### Naming people
+
+Take the owner from the initiative's own assignee; fall back to the delivery item's assignee, then
+to whoever holds most of the tasks. Translate the handle to a real name through
+`config/people.json`.
+
+That file is built by matching a handle's letters against the Google Workspace directory
+(`gws people people searchDirectoryPeople`) and accepting a match **only when some rendering of
+the person's real name equals the handle** — `adrianogarciagympass` → `adriano` + `garcia`. A
+near-miss is never accepted: put the handle under `unknown` and ask a human. Naming the wrong
+person as responsible in a document this widely read is worse than leaving it blank.
+
+Where nobody is assigned, write "Not assigned" rather than inventing an owner.
+
+### Laying out Observations
+
+This column is the whole report for most readers. Give it room: short labelled blocks, bullets,
+and **blank lines between blocks**. Taller rows are the intended trade — never compress it back
+into a paragraph.
+
+```
+🟢 ON TRACK · being built
+
+Testing (UAT): 18 September
+Go live: not yet scheduled
+
+What's happening
+• The prototype is finished and signed off with the business.
+• The unused fields still have to be taken off the sales screens.
+
+Needs attention
+• The testing date is days away while the change itself has not started.
+```
+
+- The first line is the status, in caps, with the plain-language stage after it.
+- Both dates always appear, even when the answer is "not yet scheduled".
+- `What's happening` is bullets, one fact each — not one long sentence split by commas.
+- `Needs attention` appears only when there is something to say, and is also bullets.
+- Blank lines between blocks are required; they are what makes the cell readable.
+
+### Around the table
+
+Emit a dateline (planning period, and that this was prepared from the teams' boards), a one-line
+summary of the whole set, and a short closing section beneath the table.
+
+**The closing notes must name the work they refer to.** "One piece of work is blocked" is useless;
+"Global Affiliates (Phase 2/2) cannot begin end-to-end testing until another team creates the
+Brazilian marketplace" tells the reader where to look. Every claim names the initiatives behind it
+— if that makes a note long, split it into two, but never leave a count without the names.
+
+Open the closing section with the legend, explaining each symbol in words ("🟢 on track",
+"🚫 blocked by another team"). Then one note per theme: what finished, what is blocked, where the
+dates stand, and anything that needs a decision — each naming its initiatives.
+
+### Write for everyone, not for the team that built it
+
+The audience is business, legal, finance and engineering at once. Most readers have never opened
+the planning board and do not know the vocabulary.
+
+- **Never use the internal names of things.** Not "Cadence", not "Tactical Cycle", not "TC5", not
+  "epic", "sub-issue", "leaf task", "roadmap ID", "initiative health", "snapshot".
+- **Say what a stage means**, don't name it: "being defined", "being agreed with other teams",
+  "being built", "in testing", "waiting on another team", "blocked", "finished", "not started yet".
+  Avoid "refinement", "discovery", "alignment", "in dev", "UAT scheduled" as bare labels.
+- **Spell out an abbreviation the first time** it appears — "testing (UAT)", "go live (production)".
+- **Explain consequences, not mechanics.** "Waiting on another team to create the Brazilian
+  marketplace before testing can start" beats "blocked by a dependency on Tagus".
+- **No names of individuals**, no handles, no ticket jargon.
+
+Full project names, always — as the project is formally called, not a shortened form.
 
 ### Roll-up runs are grouped by project
 
 A whole-portfolio run covers dozens of initiatives across every project, and one flat table loses all sense
 of which project a row belongs to. So the roll-up is written as **one section per project** —
-a `HEADING_3` title (`<Project> — N initiatives`), a one-line health summary (`10 🟢 Green ·
+a `HEADING_3` title carrying the project's **full** name (`<Full Project Name> — N initiatives`), a one-line health summary (`10 🟢 Green ·
 1 ✅ Done`), then that project's table.
 
 Sections are ordered **largest first**, rows within a section still ascend by issue number. The
-columns stay the same four, because the section heading already carries the project — so a given
+columns stay the same five, because the section heading already carries the project — so a given
 row looks identical in its project's own document and in the roll-up.
 
 Pass these as `sections` in the payload instead of a top-level `header`/`rows`.
@@ -134,12 +204,45 @@ python3 scripts/publish_entry.py --doc <documentId> --payload /tmp/payload.json
 Payload shape is documented at the top of `publish_entry.py`. `--list-tabs` prints a document's
 tabs; `--dry-run` resolves the tab and reports without writing.
 
-The script is idempotent: re-running on the same day replaces that day's entry instead of
-duplicating it. Prior entries are never touched, and tab 1 of the document is never touched.
+**The script never overwrites anything.** Every run inserts a brand-new section at the top of the
+tab; no existing content is deleted, edited or replaced, and the document's other tabs are never
+touched. Running twice in a day produces two entries — the script says so, and a human deletes the
+one they don't want. Never add a delete or replace step to get around that: an accidental rewrite
+of a published entry is unrecoverable, a duplicate is a five-second fix.
 
-**Some documents may not have the target tab** — the config records this as `tab_ok: false`, and
-the script refuses rather than guessing. The Docs API cannot create a tab. Report it and ask the
-user to add it by hand; never write into a different tab as a substitute.
+**Some documents may not have the target tab.** The script checks at publish time and refuses
+rather than guessing — deliberately not a config flag, because a tab can be added or renamed at any
+moment and a stale flag would be worse than no flag. The Docs API cannot create a tab: report it
+and ask the user to add it by hand, never write into a different tab as a substitute.
+
+## First run — generating the configuration
+
+Nothing is hand-written. Ask only for the **Focus Area** (e.g. `SFX`) and any squad to leave out,
+then:
+
+```
+python3 scripts/setup.py --focus-area <FA> [--exclude "<FA> - Lead"] \
+    [--rollup-doc <id>] [--rollup-name "<display name>"] --apply
+```
+
+It derives the squads from the Tactical Cycle repo's `config/focus-areas/<fa>.yml`, the projects
+from the Program IDs those squads actually lead in the latest snapshot, their display names from
+the repo's `programs.yml` and `projects.yml`, and the documents from a Drive search.
+
+Without `--apply` it only proposes. **Always show the proposal before applying**, because document
+matching is the one part that can be wrong:
+
+- a match is auto-accepted only when every distinctive word of the project name appears in the
+  document title *and* the title is not mostly about something else. That two-way test is what
+  stops "Engineer Live update: Support BR Tax Reform Notes" being mistaken for the BR Tax Reform
+  live update;
+- anything weaker is listed with its candidates for a human to pick;
+- a project with no match gets `doc: null` and becomes report-only.
+
+Re-run it whenever squads or projects change; it is how a newly created project appears.
+
+For the Responsible column, `config/people.json` is built the same way — resolve each assignee
+handle against the Workspace directory, accept only exact matches, list the rest as `unknown`.
 
 ## Auth notes
 

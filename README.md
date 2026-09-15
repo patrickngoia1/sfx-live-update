@@ -57,15 +57,32 @@ that project or to the whole portfolio.
 ```bash
 git clone https://github.com/<you>/sfx-live-update.git \
   ~/.claude/skills/sfx-cadence-live-update
-cd ~/.claude/skills/sfx-cadence-live-update
-cp config/projects.example.json config/projects.json
 ```
 
-Then fill in `config/projects.json` — your squads, your projects and their Program IDs, and the
-Google Doc ID of each Live Update document. That file is gitignored: **document IDs and internal
-project names never leave your machine.**
+That's it. Invoke `/sfx-cadence-live-update` and answer one question — your Focus Area — and the
+skill works the rest out:
 
-Invoke with `/sfx-cadence-live-update`, or just ask for the status of a project's initiatives.
+- **your squads**, from the Tactical Cycle repo's own Focus Area file;
+- **your projects and their Program IDs**, from the projects those squads actually lead in the
+  latest daily snapshot, named from the repo's programme and project registries;
+- **your Live Update documents**, found by searching Drive and shown to you for confirmation
+  before anything is written;
+- **who is responsible**, by resolving assignees against the Workspace directory.
+
+Nothing is hand-written and nothing is guessed silently: a document match is auto-accepted only
+when the project name and the document title genuinely correspond, and every weaker match is put
+in front of you with its candidates.
+
+To redo it later — a new project, a new squad — run it again:
+
+```bash
+python3 scripts/setup.py --focus-area SFX --exclude "SFX - Lead" \
+  --rollup-doc <id> --rollup-name "<display name>"        # proposes
+python3 scripts/setup.py ... --apply                       # writes
+```
+
+The generated `config/projects.json` and `config/people.json` are gitignored: **document IDs,
+project names and people never leave your machine.**
 
 ## Prerequisites
 
