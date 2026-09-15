@@ -145,16 +145,41 @@ Needs attention
 ### Around the table
 
 Emit a dateline (planning period, and that this was prepared from the teams' boards), a one-line
-summary of the whole set, and a short closing section beneath the table.
+summary of the whole set, and a closing section beneath the table.
 
-**The closing notes must name the work they refer to.** "One piece of work is blocked" is useless;
-"Global Affiliates (Phase 2/2) cannot begin end-to-end testing until another team creates the
-Brazilian marketplace" tells the reader where to look. Every claim names the initiatives behind it
-— if that makes a note long, split it into two, but never leave a count without the names.
+**The closing section is broken into labelled topics, not a run of long paragraphs.** A wall of
+prose at the foot of a long table does not get read. One short heading per theme, bullets beneath
+it, a blank line between topics:
 
-Open the closing section with the legend, explaining each symbol in words ("🟢 on track",
-"🚫 blocked by another team"). Then one note per theme: what finished, what is blocked, where the
-dates stand, and anything that needs a decision — each naming its initiatives.
+```
+How to read this
+🟢 on track · 🟡 some risk · 🔴 at risk · ✅ finished · ⚪ not started yet · 🚫 blocked
+
+Finished
+• Salesforce WhatsApp AI Agent Pilot (Sofia) — closed on 11 September.
+
+Blocked
+• Global Affiliates (Phase 2/2) — cannot start end-to-end testing until another
+  team creates the Brazilian marketplace.
+• Billing Day & Waiver Date Sync — waiting on that same team for its own change.
+
+Dates
+• Two pieces of work have a confirmed testing date: Removal of Low-Fill Fields
+  (18 September) and Salesforce Core Corrections (24 September).
+• None has a confirmed go-live date. The period ends on 23 October.
+
+Needs a decision
+• Closed with nothing delivered: Sales Cockpit, Pool Clients Identification, …
+```
+
+Rules for it:
+
+- **Every claim names the work it refers to.** "One piece of work is blocked" is useless; naming it
+  tells the reader where to look. Never leave a count without the names.
+- One topic per theme — what finished, what is blocked, where the dates stand, what needs a
+  decision. Drop a topic entirely when it is empty rather than writing "none".
+- Bullets, not sentences strung together with semicolons.
+- Open with the legend, explaining each symbol in words.
 
 ### Write for everyone, not for the team that built it
 
@@ -196,7 +221,20 @@ whose plan says work starts next month. Those mislead the reader; missing dates 
 
 ## 5. Publish
 
-Show the table in the conversation and get an explicit yes before writing. Then:
+**Publish without asking.** Once the user has chosen the scope in step 1, that is the go-ahead —
+do not stop for a second confirmation. Write the entry, then show what was written and the link.
+
+This is safe because of what publishing can and cannot do: it only ever **adds** a section to one
+named tab of one configured document, it never edits or deletes anything that is already there,
+and it refuses outright when the tab is missing. The worst case is an extra entry a human deletes
+in seconds.
+
+Two things still stop and ask, and must keep doing so:
+
+- **a document that is not in the config** — never publish anywhere the operator has not registered;
+- **a missing tab** — report it, never substitute another tab.
+
+To publish:
 
 ```
 python3 scripts/publish_entry.py --doc <documentId> --payload /tmp/payload.json
