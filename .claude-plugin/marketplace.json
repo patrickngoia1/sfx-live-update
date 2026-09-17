@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Marketplace for the SFX Live Update skill — publishes Tactical Cycle status into Google Docs Live Update documents. Installed as a plugin so updates reach everyone with `claude plugin update`.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
