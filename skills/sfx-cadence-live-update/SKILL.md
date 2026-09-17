@@ -53,8 +53,8 @@ Each record carries `ref`, `title`, `team`, `roadmap_id`, `health`, `pct`, `done
 Select records whose `roadmap_id` is in the chosen project's `roadmap_ids` **and** whose `team`
 is in `teams`. Everything in the snapshot is the current cycle, so no cycle filter is needed.
 
-Then, per surviving initiative, walk the tree and read the commentary — this is where ETAs and
-progress narrative live, and there is no other source for them:
+Then, per surviving initiative, walk the tree and read the commentary — this is where the progress
+narrative lives. **Dates do not come from here** (see *Where dates come from*):
 
 ```
 gh api graphql -f query='query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){
@@ -101,6 +101,29 @@ project name as the document names it, not the Cadence ID.
 - **Initiative** — the **full** name, bold and black. Pass `"bold_columns": [1]` in the payload.
 - **Responsible** — the person's **real name**, never a GitHub handle. See *Naming people* below.
 - **Observations** — see *Laying out Observations* below. Never a paragraph.
+
+### Where dates come from
+
+**Only from the epic's dedicated delivery cards, never from prose.** Each epic should carry a UAT
+card and a production card; the date is that card's **`Start date`**. A date somebody mentioned in
+a comment is not a commitment and must not be reported as one.
+
+```
+python3 scripts/uat_prod_dates.py <owner>/<repo> 172 173 180 …
+```
+
+- Cards are found by title: `UAT`, `User Acceptance Testing`, `User Testing` for testing;
+  `Production`, `PROD`, `Deploy to Prod`, `[Deploy]` for release. Naming varies between squads, so
+  match loosely.
+- **The card's `Start date` lives in one of two APIs, and both are in use.** `issueFieldValues` is
+  the issue's own field and holds the large majority of real dates; Projects v2 has a board column
+  of the same name that a few cards use instead. Read the issue field first, then fall back to the
+  board. Reading only the board finds almost nothing and looks identical to "the teams have filled
+  nothing in" — an expensive thing to get wrong, and it was got wrong once.
+- **No card, or a card with an empty `Start date` → "no date defined".** Report that plainly; do
+  not substitute the initiative's planned window, a comment, or a guess.
+- **Two dated cards that disagree → say so** rather than picking one. Where both are dated today
+  they agree, so a disagreement is a real finding.
 
 ### Naming people
 
